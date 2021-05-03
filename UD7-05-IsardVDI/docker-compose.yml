@@ -1,0 +1,723 @@
+networks:
+  isard-network:
+    external: false
+    name: isard-network
+  isard-vpn:
+    external: false
+    name: isard-vpn
+services:
+  isard-api:
+    container_name: isard-api
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/api:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    ports:
+    - published: 7039
+      target: 7039
+    restart: unless-stopped
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+  isard-backend:
+    container_name: isard-backend
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/backend:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    ports:
+    - published: 1312
+      target: 1312
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/backend/keys:/keys:rw
+    - /opt/isard/backend/metadata:/metadata:rw
+  isard-db:
+    container_name: isard-db
+    image: rethinkdb
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    ports:
+    - published: 8080
+      target: 8080
+    - published: 28015
+      target: 28015
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/database:/data:rw
+    - /etc/localtime:/etc/localtime:ro
+  isard-engine:
+    container_name: isard-engine
+    depends_on:
+    - isard-db
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/engine:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/certs/viewers:/certs:rw
+    - /etc/localtime:/etc/localtime:ro
+    - /opt/isard/sshkeys:/root/.ssh:rw
+  isard-grafana:
+    container_name: isard-grafana
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/grafana:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    ports:
+    - published: 2004
+      target: 2004
+    - published: 3000
+      target: 3000
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/grafana/grafana/data:/grafana/data:rw
+    - /opt/isard/grafana/graphite/conf:/opt/graphite/conf:rw
+    - /opt/isard/grafana/graphite/storage:/opt/graphite/storage:rw
+  isard-hypervisor:
+    container_name: isard-hypervisor
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/hypervisor:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+      isard-vpn: {}
+    ports:
+    - published: 2022
+      target: 22
+    privileged: true
+    restart: unless-stopped
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /opt/isard/certs/viewers:/etc/pki/libvirt-spice:rw
+    - /opt/isard:/isard:rw
+    - /opt/isard/sshkeys:/root/.ssh:rw
+    - /opt/isard/hypervisor/sshd_keys:/usr/local/etc/ssh:rw
+    - /opt/isard-local/sockets:/var/run/libvirt:rw
+  isard-portal:
+    cap_add:
+    - NET_ADMIN
+    container_name: isard-portal
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/portal:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    ports:
+    - published: 80
+      target: 80
+    - published: 443
+      target: 443
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/certs/default:/certs:rw
+    - /opt/isard/certs/letsencrypt:/etc/letsencrypt:rw
+  isard-redis:
+    container_name: isard-redis
+    image: redis:6-alpine
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/redis:/data:rw
+  isard-squid:
+    container_name: isard-squid
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/squid:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: '1'
+  isard-static:
+    container_name: isard-static
+    image: registry.gitlab.com/isard/isardvdi/static:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+    volumes:
+    - /opt/isard/frontend/custom:/usr/share/nginx/html/custom:ro
+  isard-vpn:
+    cap_add:
+    - NET_ADMIN
+    - SYS_MODULE
+    container_name: isard-vpn
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/vpn:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+      isard-vpn: {}
+    ports:
+    - protocol: udp
+      published: 443
+      target: 443
+    - protocol: udp
+      published: 4443
+      target: 4443
+    privileged: true
+    restart: unless-stopped
+    volumes:
+    - /opt/isard-local/wireguard/certs:/certs:rw
+    - /sys:/sys:rw
+  isard-webapp:
+    container_name: isard-webapp
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/webapp:develop
+    labels:
+      traefik.enable: "true"
+      traefik.http.middlewares.webapp-auth.basicauth.usersfile: /users
+      traefik.http.middlewares.webapp-path.stripprefix.prefixes: /debug/webapp
+      traefik.http.routers.webapp.middlewares: webapp-auth@docker,webapp-path@docker
+      traefik.http.routers.webapp.rule: PathPrefix(`/debug/webapp`)
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /opt/isard/backups:/isard/backups:rw
+  isard-websockify:
+    container_name: isard-websockify
+    environment:
+      BACKEND_AUTH_AUTOREGISTRATION: "true"
+      BACKEND_HOST: localhost
+      BACKEND_ISARD_API_HOST: isard-api
+      BACKEND_MANTEINANCE_ADMINS: admin
+      BACKEND_REDIS_HOST: isard-redis
+      BACKEND_REDIS_PASSWORD: ''
+      BUILD_ROOT_PATH: .
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/isard/isardvdi/
+      DOCKER_IMAGE_TAG: develop
+      FRONTEND_SHOW_ADMIN_BTN: "True"
+      GRAFANA_HOST: isard-grafana
+      GRAFANA_PATH: /monitor/
+      GRAFANA_PORT: '443'
+      GRAFANA_URL: localhost
+      HOSTNAME: localhost
+      HYPERVISOR_NUMBER: '0'
+      LOG_LEVEL: INFO
+      RETHINKDB_DB: isard
+      RETHINKDB_HOST: isard-db
+      RETHINKDB_PORT: '28015'
+      STATS_HOSTNAME: localhost
+      STATS_RETHINKDB_DB: isard
+      STATS_RETHINKDB_HOST: isard-db
+      STATS_RETHINKDB_PORT: '28015'
+      STATS_SERVER: isard-grafana
+      TELEGRAM_BOT_CHAT_ID: ''
+      TELEGRAM_BOT_TOKEN: ''
+      VIDEO_HAPROXY_HOST: isard-video
+      VIDEO_HYPERVISOR_HOSTNAMES: isard-hypervisor
+      VIDEO_HYPERVISOR_PORTS: 5900-6899
+      VIDEO_LETSENCRYPT_DNS: ''
+      VIDEO_LETSENCRYPT_EMAIL: ''
+      VIDEO_PORT: '443'
+      VIDEO_STATS_PORT: '8889'
+      WEBAPP_ADMIN_PWD: IsardVDI
+      WEBAPP_HOST: isard-webapp
+      WEBAPP_LETSENCRYPT_DNS: ''
+      WEBAPP_LETSENCRYPT_EMAIL: ''
+      WEBAPP_RETHINKDB_DB: isard
+      WEBAPP_RETHINKDB_HOST: isard-db
+      WEBAPP_RETHINKDB_PORT: '28015'
+      WEBAPP_SESSION_SECRET: xq0Z3MP5ujxrQxtMGxgPiijH9xpuxkyP04R6At/V+g4=
+      WG_GUESTS_DHCP_MASK: '23'
+      WG_GUESTS_NETS: 10.2.0.0/16
+      WG_GUESTS_RESERVED_HOSTS: '20'
+      WG_HYPERS_NET: 10.1.0.0/24
+      WG_HYPERS_PORT: '4443'
+      WG_INTERFACE: eth1
+      WG_USERS_NET: 10.0.0.0/16
+      WG_USERS_PORT: '443'
+    image: registry.gitlab.com/isard/isardvdi/websockify:develop
+    logging:
+      options:
+        max-size: 100m
+    networks:
+      isard-network: {}
+    restart: unless-stopped
+version: '3.5'
+
